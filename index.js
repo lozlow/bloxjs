@@ -71,9 +71,13 @@ const Blox = {
 						return this.$props;
 					}
 				},
+				$props: {
+					value: {},
+					enumerable: true
+				},
 				$state: {
 					value: 0,
-					writable: true
+					enumerable: false
 				}
 			}
 		);
