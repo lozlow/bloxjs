@@ -1,43 +1,67 @@
 import elementStates from './elementStates';
+import { applyProperties } from './createElement';
+import DomDiff from 'diff-dom';
+
+let unnamedComponentCount = 1;
 
 export function createClass(def) {
+	const componentDefinition = Object.assign(
+		{
+			componentDidMount() {},
+			componentDidReceiveProps() {}
+		},
+		def
+	);
 	const classProto = Object.create(
 		HTMLElement.prototype,
 		{
 			createdCallback: {
 				value: function $onCreated() {
-					console.log('created', this);
 					this.$state = elementStates.CONSTRUCTED;
 				}
 			},
 			attachedCallback: {
 				value: function $onAttached() {
 					this.$state = elementStates.ATTACHED;
-					this.$render();
-					def.componentDidMount();
+					this.$attachChildren();
+					componentDefinition.componentDidMount();
 				}
 			},
-			$render: {
-				value: function $render() {
-					while (this.firstChild) {
-						this.removeChild(this.firstChild);
-					}
-					const children = def.render(this.$props);
+			$attachChildren: {
+				value: function $attachChildren() {
+					let children = componentDefinition.render(this.$props);
 					if (children instanceof Array) {
 						children.forEach(this.appendChild.bind(this));
 					} else {
+						if (typeof children === 'string') {
+							children = document.createTextNode(children);
+						}
 						this.appendChild(children);
 					}
+				}
+			},
+			$patch: {
+				value: function $patch(nextProps) {
+					const differ = new DomDiff();
+					const nodes = this.childNodes;
+					const next = [].concat(componentDefinition.render(nextProps));
+					const patches = Array.from(nodes).map(
+						(node, idx) => { return differ.diff(node, next[idx]) }
+					);
+					patches.forEach(
+						(patch, idx) => differ.apply(nodes[idx], patch)
+					);
+					applyProperties(this, nextProps);
 				}
 			},
 			props: {
 				enumerable: true,
 				set: function $setProps(props) {
 					this.$props = props;
-					def.componentDidReceiveProps(props);
-					if ((!def.shouldComponentUpdate || def.shouldComponentUpdate()) &&
+					componentDefinition.componentDidReceiveProps(props);
+					if ((!componentDefinition.shouldComponentUpdate || componentDefinition.shouldComponentUpdate()) &&
 						this.$state >= elementStates.ATTACHED) {
-						this.$render();
+						this.$patch(props);
 					}
 				},
 				get: function $getProps() {
@@ -56,6 +80,12 @@ export function createClass(def) {
 			}
 		}
 	);
-	const factory = document.registerElement(def.name, { prototype: classProto });
+
+	if (!componentDefinition.componentName) {
+		componentDefinition.componentName = 'b-UnnamedComponent' + unnamedComponentCount++;
+		console.warn(`componentName not supplied in component definition, using ${componentDefinition.componentName}`);
+	}
+
+	const factory = document.registerElement(componentDefinition.componentName, { prototype: classProto });
 	return factory;
 }

@@ -11,7 +11,9 @@
     "eslint": "^1.10.3",
     "eslint-config-airbnb": "^5.0.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "dom-diff": "git://github.com/fiduswriter/diffDOM.git#gh-pages"
+  },
   "scripts": {
     "watch": "webpack-dev-server --content-base build/ --hot --inline",
     "test": "echo \"Error: no test specified\" && exit 1"
