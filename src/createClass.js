@@ -24,6 +24,13 @@ export function createClass(def) {
 				value: function $onAttached() {
 					this.$state = elementStates.ATTACHED;
 					this.$attachChildren();
+					applyProperties(this, Object.assign(
+						{},
+						{
+							[componentDefinition.className && 'className']: componentDefinition.className,
+							[componentDefinition.style && 'style']: componentDefinition.style
+						}
+					));
 					componentDefinition.componentDidMount();
 				}
 			},

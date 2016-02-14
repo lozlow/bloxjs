@@ -55,6 +55,12 @@ const Item = blox.createClass({
 
 
 const MenuItem = blox.createClass({
+	style: {
+		display: 'inline-block',
+		background: '#FBFBFB',
+		padding: '8px',
+		border: '1px solid #eee'
+	},
 	render(props) {
 		return props.label;
 	}
