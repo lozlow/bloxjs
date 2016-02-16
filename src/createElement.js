@@ -1,4 +1,7 @@
 import tags from './tags';
+import { createClass, getNextComponentName } from './createClass';
+
+const pureFns = new Map();
 
 function applyStyles(el, styles) {
 	Object.keys(styles).forEach(
@@ -23,12 +26,33 @@ export function applyProperties(el, properties) {
 export function createElement(ctr, props, children) {
 	if (props instanceof Array || typeof props !== 'object') props = children;
 	props = props || {};
-	if (typeof ctr === 'function') {
+	if (typeof ctr === 'function' && ctr.prototype instanceof HTMLElement) {
 		const component = new ctr();
 		component.props = props;
 		applyProperties(component, props);
 		return component;
-	} if (typeof ctr === 'string' && !tags.includes(ctr.toLowerCase())) {
+	} else if (typeof ctr === 'function') {
+		let component;
+		if (pureFns.has(ctr)) {
+			component = pureFns.get(ctr);
+		} else {
+			let componentName = ctr.componentName || ctr.name;
+			if (componentName === '') {
+				componentName = getNextComponentName();
+				console.warn(`Unnamed pure render function passed to createElement, using component name ${componentName}`);
+			}
+			component = createClass({
+				componentName,
+				render: ctr
+			});
+			pureFns.set(ctr, component);
+		}
+		return createElement(
+			component,
+			props,
+			children
+		);
+	} else if (typeof ctr === 'string' && !tags.includes(ctr.toLowerCase())) {
 		return document.createTextNode(ctr);
 	} else {
 		const el = document.createElement(ctr);

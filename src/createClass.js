@@ -4,6 +4,10 @@ import DomDiff from 'diff-dom';
 
 let unnamedComponentCount = 1;
 
+export function getNextComponentName() {
+	return 'b-UnnamedComponent' + unnamedComponentCount++;
+}
+
 export function createClass(def) {
 	const componentDefinition = Object.assign(
 		{
@@ -89,7 +93,7 @@ export function createClass(def) {
 	);
 
 	if (!componentDefinition.componentName) {
-		componentDefinition.componentName = 'b-UnnamedComponent' + unnamedComponentCount++;
+		componentDefinition.componentName = getNextComponentName();
 		console.warn(`componentName not supplied in component definition, using ${componentDefinition.componentName}`);
 	}
 

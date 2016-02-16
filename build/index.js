@@ -52,7 +52,10 @@ const Item = blox.createClass({
 // setTimeout(() => el.props = { text: 'goodbye' }, 3000);
 // setTimeout(() => blox.render(blox.createElement(Item, { text: 'hello' }), document.getElementById('app')), 3000);
 
-
+function Label(props) {
+	return props.label;
+}
+Label.componentName = 'b-label';
 
 const MenuItem = blox.createClass({
 	style: {
@@ -62,7 +65,7 @@ const MenuItem = blox.createClass({
 		border: '1px solid #eee'
 	},
 	render(props) {
-		return props.label;
+		return blox.createElement(Label, { label: props.label });
 	}
 });
 
