@@ -77,6 +77,7 @@ const MenuComponent = blox.createClass({
 	shouldComponentUpdate(props, nextProps) {
 		debugger;
 	},
+	defaultProps: { items: [] },
 	render(props) {
 		return [
 			blox.createElement('button', { onclick: () => menuItemsCursor.push('items', { label: 'test' }) }, 'Add an item'),

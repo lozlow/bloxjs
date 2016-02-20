@@ -21,12 +21,12 @@ export function createClass(def) {
 		{
 			createdCallback: {
 				value: function $onCreated() {
+					this.$props = Object.assign({}, componentDefinition.defaultProps);
 					this.$state = elementStates.CONSTRUCTED;
 				}
 			},
 			attachedCallback: {
 				value: function $onAttached() {
-					this.$state = elementStates.ATTACHED;
 					this.$attachChildren();
 					applyProperties(this, Object.assign(
 						{},
@@ -35,6 +35,7 @@ export function createClass(def) {
 							[componentDefinition.style && 'style']: componentDefinition.style
 						}
 					));
+					this.$state = elementStates.ATTACHED;
 					componentDefinition.componentDidMount();
 				}
 			},
