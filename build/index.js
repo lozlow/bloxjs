@@ -74,9 +74,6 @@ const menuItemsCursor = tree.select();
 
 const MenuComponent = blox.createClass({
 	componentName: 'b-Menu',
-	shouldComponentUpdate(props, nextProps) {
-		debugger;
-	},
 	defaultProps: { items: [] },
 	render(props) {
 		return [

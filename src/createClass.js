@@ -11,6 +11,7 @@ export function getNextComponentName() {
 export function createClass(def) {
 	const componentDefinition = Object.assign(
 		{
+			componentWillMount() {},
 			componentDidMount() {},
 			componentDidReceiveProps() {}
 		},
@@ -27,21 +28,25 @@ export function createClass(def) {
 			},
 			attachedCallback: {
 				value: function $onAttached() {
+					componentDefinition.componentWillMount.call(this);
+					applyProperties(
+						this,
+						Object.assign(
+							{},
+							{
+								[componentDefinition.className && 'className']: componentDefinition.className,
+								[componentDefinition.style && 'style']: componentDefinition.style
+							}
+						)
+					);
 					this.$attachChildren();
-					applyProperties(this, Object.assign(
-						{},
-						{
-							[componentDefinition.className && 'className']: componentDefinition.className,
-							[componentDefinition.style && 'style']: componentDefinition.style
-						}
-					));
 					this.$state = elementStates.ATTACHED;
-					componentDefinition.componentDidMount();
+					componentDefinition.componentDidMount.call(this);
 				}
 			},
 			$attachChildren: {
 				value: function $attachChildren() {
-					let children = componentDefinition.render(this.$props);
+					let children = componentDefinition.render.call(this, this.$props);
 
 					const append = (el) => {
 						if (el instanceof Array) {
@@ -61,7 +66,7 @@ export function createClass(def) {
 				value: function $patch(nextProps) {
 					const differ = new DomDiff();
 					const nodes = this.childNodes;
-					const next = [].concat(componentDefinition.render(nextProps));
+					const next = [].concat(componentDefinition.render.call(this, nextProps));
 					const patches = Array.from(nodes).map(
 						(node, idx) => { return differ.diff(node, next[idx]) }
 					);
@@ -76,7 +81,7 @@ export function createClass(def) {
 				set: function $setProps(props) {
 					componentDefinition.componentDidReceiveProps(props);
 					if (this.$state >= elementStates.ATTACHED &&
-						(!componentDefinition.shouldComponentUpdate || componentDefinition.shouldComponentUpdate(this.$props, props))) {
+						(!componentDefinition.shouldComponentUpdate || componentDefinition.shouldComponentUpdate.call(this, this.$props, props))) {
 						this.$patch(props);
 					}
 					this.$props = props;
