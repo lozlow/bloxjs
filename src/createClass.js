@@ -41,14 +41,19 @@ export function createClass(def) {
 			$attachChildren: {
 				value: function $attachChildren() {
 					let children = componentDefinition.render(this.$props);
-					if (children instanceof Array) {
-						children.forEach(this.appendChild.bind(this));
-					} else {
-						if (typeof children === 'string') {
-							children = document.createTextNode(children);
+
+					const append = (el) => {
+						if (el instanceof Array) {
+							el.forEach(append);
+						} else {
+							if (typeof el === 'string') {
+								el = document.createTextNode(el);
+							}
+							this.appendChild(el);
 						}
-						this.appendChild(children);
 					}
+
+					append(children);
 				}
 			},
 			$patch: {
@@ -68,12 +73,12 @@ export function createClass(def) {
 			props: {
 				enumerable: true,
 				set: function $setProps(props) {
-					this.$props = props;
 					componentDefinition.componentDidReceiveProps(props);
-					if ((!componentDefinition.shouldComponentUpdate || componentDefinition.shouldComponentUpdate()) &&
-						this.$state >= elementStates.ATTACHED) {
+					if (this.$state >= elementStates.ATTACHED &&
+						(!componentDefinition.shouldComponentUpdate || componentDefinition.shouldComponentUpdate(this.$props, props))) {
 						this.$patch(props);
 					}
+					this.$props = props;
 				},
 				get: function $getProps() {
 					return this.$props;

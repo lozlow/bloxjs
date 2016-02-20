@@ -69,10 +69,22 @@ const MenuItem = blox.createClass({
 	}
 });
 
-const Menu = blox.createClass({
+const tree = new blox.Baobab({ items: [{ label: 'Home' }, { label: 'About' }] });
+const menuItemsCursor = tree.select();
+
+const MenuComponent = blox.createClass({
+	componentName: 'b-Menu',
+	shouldComponentUpdate(props, nextProps) {
+		debugger;
+	},
 	render(props) {
-		return props.items.map(item => blox.createElement(MenuItem, item));
+		return [
+			blox.createElement('button', { onclick: () => menuItemsCursor.push('items', { label: 'test' }) }, 'Add an item'),
+			props.items.map(item => blox.createElement(MenuItem, item))
+		];
 	}
 });
+const menu = blox.createElement(MenuComponent, menuItemsCursor.get());
 
-blox.render(blox.createElement(Menu, { items: [{ label: 'Home' }, { label: 'About' }] }), document.getElementById('app'));
+menuItemsCursor.on('update', () => menu.props = menuItemsCursor.get());
+blox.render(menu, document.getElementById('app'));
